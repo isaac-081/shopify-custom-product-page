@@ -1,0 +1,135 @@
+<section class="custom-product-page">
+  <div class="page-width">
+
+    {% assign product = section.settings.product %}
+
+    {% if product != blank %}
+
+      <div class="custom-product-page__grid">
+
+        <div class="custom-product-page__media">
+          {% if product.featured_image %}
+            {{
+              product.featured_image
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'eager',
+                widths: '600, 900, 1200',
+                sizes: '(min-width: 990px) 50vw, 100vw',
+                alt: product.featured_image.alt
+            }}
+          {% endif %}
+        </div>
+
+        <div class="custom-product-page__content">
+
+          <p class="custom-product-page__vendor">
+            {{ product.vendor }}
+          </p>
+
+          <h1>{{ product.title }}</h1>
+
+          <div class="custom-product-page__price">
+            {{ product.price | money }}
+          </div>
+
+          {% if product.description != blank %}
+            <div class="custom-product-page__description">
+              {{ product.description }}
+            </div>
+          {% endif %}
+
+          {% form 'product', product, class: 'custom-product-form' %}
+
+            {% unless product.has_only_default_variant %}
+              <div class="custom-product-page__variants">
+
+                {% for option in product.options_with_values %}
+                  <div class="custom-product-page__option">
+
+                    <label for="Option-{{ section.id }}-{{ forloop.index }}">
+                      {{ option.name }}
+                    </label>
+
+                    <select
+                      id="Option-{{ section.id }}-{{ forloop.index }}"
+                      name="options[{{ option.name | escape }}]"
+                    >
+                      {% for value in option.values %}
+                        <option value="{{ value | escape }}">
+                          {{ value }}
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                  </div>
+                {% endfor %}
+
+              </div>
+            {% endunless %}
+
+            <div class="custom-product-page__quantity">
+              <label for="Quantity-{{ section.id }}">
+                Quantity
+              </label>
+
+              <input
+                id="Quantity-{{ section.id }}"
+                type="number"
+                name="quantity"
+                min="1"
+                value="1"
+              >
+            </div>
+
+            <input
+              type="hidden"
+              name="id"
+              value="{{ product.selected_or_first_available_variant.id }}"
+            >
+
+            <button
+              type="submit"
+              name="add"
+              class="custom-product-page__button"
+              {% unless product.available %}disabled{% endunless %}
+            >
+              {% if product.available %}
+                Add to cart
+              {% else %}
+                Sold out
+              {% endif %}
+            </button>
+
+          {% endform %}
+
+        </div>
+
+      </div>
+
+    {% else %}
+
+      <p>Select a product in the section settings.</p>
+
+    {% endif %}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Custom Product Page",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Product Page"
+    }
+  ]
+}
+{% endschema %}
